@@ -1,0 +1,7 @@
+media
+.hypothesis
+.mypy_cache
+.pytest_cache
+.vscode
+__pycache__
+old
