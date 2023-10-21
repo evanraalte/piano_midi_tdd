@@ -2,7 +2,9 @@ name: linting and tests
 
 on:
   pull_request:
-
+  push:
+    branches:
+      - main
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
@@ -47,7 +49,7 @@ jobs:
     - name: Run the automated tests (ignore deprecation errors )
       run: poetry run pytest --cov-report xml --cov-report term-missing --cov=piano_midi_tdd tests/
     - name: Get Coverage
-      if: ${{ github.actor != 'dependabot[bot]' }}
+      if: ${{ github.actor != 'dependabot[bot]' && github.ref == 'refs/heads/main' }}
       uses: orgoro/coverage@v3.1
       with:
           coverageFile: coverage.xml

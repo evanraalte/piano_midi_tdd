@@ -46,23 +46,6 @@ def find_white_keys_in_groups(
         keys += list(range(key_start, key_start + num_keys))
     return keys
 
-
-def find_non_background_pixel_indices(
-    pixel_row: np.ndarray[np.uint8],
-    bg_color: tuple[np.uint8, np.uint8, np.uint8],
-    threshold: int,
-) -> list[int]:
-    non_background_pixel_indices = []
-    for idx, px in enumerate(pixel_row):
-        # Calculate the absolute difference between the row and the background color
-        color_difference = np.abs(px - bg_color)
-
-        # Check if any channel difference exceeds the threshold
-        if np.any(color_difference > threshold):
-            non_background_pixel_indices.append(idx)
-    return non_background_pixel_indices
-
-
 def find_pixel_indices(
     pixel_row: np.ndarray[np.uint8],
     color: tuple[np.uint8, np.uint8, np.uint8],
