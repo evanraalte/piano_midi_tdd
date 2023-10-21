@@ -49,12 +49,13 @@ jobs:
     - name: Run the automated tests (ignore deprecation errors )
       run: poetry run pytest --cov-report xml --cov-report term-missing --cov=piano_midi_tdd tests/
     - name: Get Coverage
-      if: ${{ github.actor != 'dependabot[bot]' && github.ref == 'refs/heads/main' }}
+      if: ${{ github.actor != 'dependabot[bot]' }}
       uses: orgoro/coverage@v3.1
       with:
           coverageFile: coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
     - name: Coverage Badge
+      if: ${{ github.ref == 'refs/heads/main' }}
       uses: tj-actions/coverage-badge-py@v2
 
     - name: Verify Changed files
