@@ -44,27 +44,9 @@ def white_key_list_strategy(draw):  # type: ignore
     return white_key_list
 
 
-@st.composite
-def integer_list_strategy(draw):  # type: ignore
-    # Determine the length of the list
-    list_length = draw(st.integers(min_value=0, max_value=WHITE_KEY_NUM - 1))
-
-    # Generate a list of integers within the specified range
-    integer_list = draw(
-        st.lists(
-            st.integers(min_value=0, max_value=WHITE_KEY_NUM - 1),
-            min_size=list_length,
-            max_size=list_length,
-        )
-    )
-
-    return integer_list
-
-
 def generate_white_keys_in_frame(
     pressed_keys: list[WhiteKey],
     bg_color: tuple[np.uint8, np.uint8, np.uint8] = (0, 0, 0),
-    pressed_key_color: tuple[np.uint8, np.uint8, np.uint8] = (83, 224, 150),
     frame_width: int = 1920,
     frame_height: int = 50,
 ) -> np.ndarray[np.uint8]:
@@ -85,7 +67,7 @@ def generate_white_keys_in_frame(
         x_end = x_start + int(white_key_width)
         y_start = 0
         y_end = frame_height
-        b, g, r = pressed_key_color
+        b, g, r = pressed_key.hand.value
         image[y_start:y_end, x_start:x_end, 0] = b
         image[y_start:y_end, x_start:x_end, 1] = g
         image[y_start:y_end, x_start:x_end, 2] = r
@@ -96,14 +78,11 @@ def generate_white_keys_in_frame(
 def test_can_detect_multiple_white_key_press_in_frame(
     white_keys: list[WhiteKey],
 ) -> None:
-    bg_color = (43, 42, 43)
-    frame = generate_white_keys_in_frame(pressed_keys=white_keys, bg_color=bg_color)
-    detected_keys = detect_white_keys(frame, bg_color=bg_color)
-    if set(detected_keys) != set(white_keys):
-        print(f"Detected: {detected_keys}")
-        # cv2.imshow("",frame)
-        # cv2.waitKey(0)
-        assert set(detected_keys) == set(white_keys)
+    BG_COLOR = (43, 42, 43)
+    frame = generate_white_keys_in_frame(pressed_keys=white_keys, bg_color=BG_COLOR)
+    detected_keys = detect_white_keys(frame=frame, hand=Hand.LEFT)
+    detected_keys += detect_white_keys(frame=frame, hand=Hand.RIGHT)
+    assert set(detected_keys) == set(white_keys)
 
 
 def test_adjacent_groups() -> None:

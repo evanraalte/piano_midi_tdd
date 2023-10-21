@@ -2,6 +2,7 @@ import math
 
 import numpy as np
 
+from piano_midi_tdd.key import Hand
 from piano_midi_tdd.key import WHITE_KEY_NUM
 from piano_midi_tdd.key import WhiteKey
 
@@ -34,14 +35,14 @@ def find_adjacent_pixels(numbers: list[int], threshold: int) -> list[tuple[int, 
     return groups
 
 
-def find_keys_in_groups(
-    groups: list[tuple[int, int]], key_width_px: float
+def find_white_keys_in_groups(
+    groups: list[tuple[int, int]], white_key_width_px: float
 ) -> list[int]:
     keys = []
     for start_px, end_px in groups:
-        key_start = math.ceil(start_px / key_width_px)
+        key_start = math.ceil(start_px / white_key_width_px)
         group_size_px = end_px - start_px
-        num_keys = round(group_size_px / key_width_px)
+        num_keys = round(group_size_px / white_key_width_px)
         keys += list(range(key_start, key_start + num_keys))
     return keys
 
@@ -62,17 +63,32 @@ def find_non_background_pixel_indices(
     return non_background_pixel_indices
 
 
+def find_pixel_indices(
+    pixel_row: np.ndarray[np.uint8],
+    color: tuple[np.uint8, np.uint8, np.uint8],
+    threshold: int,
+) -> list[int]:
+    pixel_indices = []
+    for idx, px in enumerate(pixel_row):
+        # Calculate the absolute difference between the row and the background color
+        color_difference = np.abs(px - color)
+
+        # Check if any channel difference exceeds the threshold
+        if np.any(color_difference < threshold):
+            pixel_indices.append(idx)
+    return pixel_indices
+
+
 def detect_white_keys(
     frame: np.ndarray[np.uint8],
+    hand: Hand,
     scan_line: int = 0,
-    bg_color: tuple[np.uint8, np.uint8, np.uint8] = (0, 0, 0),
-) -> list[int]:
+) -> list[WhiteKey]:
     # Initialize a list to store non-background rows
     key_width_px = len(frame[0]) / WHITE_KEY_NUM
     threshold = 10
-    non_background_pixel_indices = find_non_background_pixel_indices(
-        frame[scan_line], bg_color, threshold
-    )
-    pixel_groups = find_adjacent_pixels(non_background_pixel_indices, 5)
-    keys = find_keys_in_groups(pixel_groups, key_width_px=key_width_px)
-    return keys
+    pixel_indices = find_pixel_indices(frame[scan_line], hand.value, threshold)
+    pixel_groups = find_adjacent_pixels(pixel_indices, 5)
+    keys = find_white_keys_in_groups(pixel_groups, white_key_width_px=key_width_px)
+    white_keys = [WhiteKey(num=k, hand=hand) for k in keys]
+    return white_keys
