@@ -6,7 +6,42 @@ from hypothesis import strategies as st
 
 from piano_midi_tdd.frame import detect_white_keys
 from piano_midi_tdd.frame import find_adjacent_pixels
-from piano_midi_tdd.frame import WHITE_KEY_NUM
+from piano_midi_tdd.key import Hand
+from piano_midi_tdd.key import WHITE_KEY_NUM
+from piano_midi_tdd.key import WhiteKey
+
+
+def whitekey_strategy():  # type: ignore
+    # Define a strategy for the 'hand' field using sampled values from the Enum
+    hand_strategy = st.sampled_from(Hand)
+
+    # Define a strategy for the 'num' field (assuming it's an integer)
+    num_strategy = st.integers(min_value=1, max_value=WHITE_KEY_NUM - 1)
+
+    # Use st.builds to create instances of WhiteKey using the generated values
+    return st.builds(WhiteKey, hand=hand_strategy, num=num_strategy)
+
+
+@st.composite
+def white_key_list_strategy(draw):  # type: ignore
+    # Determine the length of the list
+    list_length = draw(st.integers(min_value=0, max_value=WHITE_KEY_NUM - 1))
+
+    unique_nums = draw(
+        st.lists(
+            st.integers(min_value=1, max_value=WHITE_KEY_NUM - 1),
+            unique=True,
+            min_size=list_length,
+            max_size=list_length,
+        )
+    )
+
+    white_key_list = [
+        WhiteKey(draw(st.sampled_from([Hand.LEFT, Hand.RIGHT])), num)
+        for num in unique_nums
+    ]
+
+    return white_key_list
 
 
 @st.composite
@@ -27,7 +62,7 @@ def integer_list_strategy(draw):  # type: ignore
 
 
 def generate_white_keys_in_frame(
-    pressed_keys: list[int],
+    pressed_keys: list[WhiteKey],
     bg_color: tuple[np.uint8, np.uint8, np.uint8] = (0, 0, 0),
     pressed_key_color: tuple[np.uint8, np.uint8, np.uint8] = (83, 224, 150),
     frame_width: int = 1920,
@@ -44,9 +79,9 @@ def generate_white_keys_in_frame(
 
     # Add keys
     for pressed_key in pressed_keys:
-        if pressed_key > WHITE_KEY_NUM:
+        if pressed_key.num > WHITE_KEY_NUM:
             raise ValueError
-        x_start = int(pressed_key * white_key_width)
+        x_start = int(pressed_key.num * white_key_width)
         x_end = x_start + int(white_key_width)
         y_start = 0
         y_end = frame_height
@@ -57,23 +92,18 @@ def generate_white_keys_in_frame(
     return image
 
 
-@given(st.integers(min_value=0, max_value=WHITE_KEY_NUM - 1))
-def test_can_detect_a_white_key_press_in_frame(key_num: int) -> None:
+@given(white_key_list_strategy())
+def test_can_detect_multiple_white_key_press_in_frame(
+    white_keys: list[WhiteKey],
+) -> None:
     bg_color = (43, 42, 43)
-    frame = generate_white_keys_in_frame(pressed_keys=[key_num], bg_color=bg_color)
-    assert detect_white_keys(frame, bg_color=bg_color) == [key_num]
-
-
-@given(integer_list_strategy())
-def test_can_detect_multiple_white_key_press_in_frame(key_nums: list[int]) -> None:
-    bg_color = (43, 42, 43)
-    frame = generate_white_keys_in_frame(pressed_keys=key_nums, bg_color=bg_color)
+    frame = generate_white_keys_in_frame(pressed_keys=white_keys, bg_color=bg_color)
     detected_keys = detect_white_keys(frame, bg_color=bg_color)
-    if set(detected_keys) != set(key_nums):
+    if set(detected_keys) != set(white_keys):
         print(f"Detected: {detected_keys}")
         # cv2.imshow("",frame)
         # cv2.waitKey(0)
-        assert False
+        assert set(detected_keys) == set(white_keys)
 
 
 def test_adjacent_groups() -> None:

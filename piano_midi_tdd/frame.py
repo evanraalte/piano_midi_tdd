@@ -2,7 +2,8 @@ import math
 
 import numpy as np
 
-WHITE_KEY_NUM = 52
+from piano_midi_tdd.key import WHITE_KEY_NUM
+from piano_midi_tdd.key import WhiteKey
 
 
 def find_adjacent_pixels(numbers: list[int], threshold: int) -> list[tuple[int, int]]:
