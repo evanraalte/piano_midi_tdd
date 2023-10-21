@@ -45,7 +45,7 @@ jobs:
     - name: Install the project dependencies
       run: poetry install
     - name: Run the automated tests (ignore deprecation errors )
-      run: poetry run pytest --cov-report xml --cov=piano_midi_tdd tests/
+      run: poetry run pytest --cov-report xml --cov-report term-missing --cov=piano_midi_tdd tests/
     - name: Get Coverage
       if: ${{ github.actor != 'dependabot[bot]' }}
       uses: orgoro/coverage@v3.1
