@@ -46,6 +46,7 @@ def find_white_keys_in_groups(
         keys += list(range(key_start, key_start + num_keys))
     return keys
 
+
 def find_pixel_indices(
     pixel_row: np.ndarray[np.uint8],
     color: tuple[np.uint8, np.uint8, np.uint8],
