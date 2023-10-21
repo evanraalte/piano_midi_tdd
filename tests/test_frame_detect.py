@@ -5,7 +5,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from piano_midi_tdd.frame import detect_white_keys
-from piano_midi_tdd.frame import find_adjacent_groups
+from piano_midi_tdd.frame import find_adjacent_pixels
 from piano_midi_tdd.frame import WHITE_KEY_NUM
 
 
@@ -79,29 +79,29 @@ def test_can_detect_multiple_white_key_press_in_frame(key_nums: list[int]) -> No
 def test_adjacent_groups() -> None:
     # Test when there are multiple adjacent groups
     numbers = [1, 2, 3, 5, 6, 7, 8, 10, 11]
-    assert find_adjacent_groups(numbers, threshold=2) == [(1, 3), (5, 8), (10, 11)]
+    assert find_adjacent_pixels(numbers, threshold=2) == [(1, 3), (5, 8), (10, 11)]
 
     # Test with a threshold of 2
     numbers = [1, 2, 4, 5, 9, 10]
-    assert find_adjacent_groups(numbers, threshold=2) == [(1, 2), (4, 5), (9, 10)]
+    assert find_adjacent_pixels(numbers, threshold=2) == [(1, 2), (4, 5), (9, 10)]
 
     # Test with a threshold of 3
     numbers = [1, 2, 5, 6, 10, 11, 12]
-    assert find_adjacent_groups(numbers, threshold=3) == [(10, 12)]
+    assert find_adjacent_pixels(numbers, threshold=3) == [(10, 12)]
 
     # Test when the list contains a single number
     numbers = [1]
-    assert find_adjacent_groups(numbers, threshold=1) == [(1, 1)]
+    assert find_adjacent_pixels(numbers, threshold=1) == [(1, 1)]
 
     # Test with negative numbers (should raise a ValueError)
     with pytest.raises(ValueError):
         numbers = [-2, -1, 0, 1, 3, 4]
-        find_adjacent_groups(numbers, threshold=1)
+        find_adjacent_pixels(numbers, threshold=1)
 
     # Test with negative threshold (should raise a ValueError)
     with pytest.raises(ValueError):
         numbers = [1, 3, 5, 9, 10, 11, 15, 20]
-        find_adjacent_groups(numbers, threshold=-2)
+        find_adjacent_pixels(numbers, threshold=-2)
 
     numbers = [0, 1, 2]
-    assert find_adjacent_groups(numbers, 2) == [(0, 2)]
+    assert find_adjacent_pixels(numbers, 2) == [(0, 2)]
