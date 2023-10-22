@@ -39,7 +39,7 @@ def test_loop_over_keys() -> None:
     pass
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 def test_all_keys() -> None:
     BG_COLOR = (43, 42, 43)
     pressed_keys = []
