@@ -11,17 +11,6 @@ from piano_midi_tdd.key import Key
 from piano_midi_tdd.key import WHITE_KEY_NUM
 
 
-def whitekey_strategy():  # type: ignore
-    # Define a strategy for the 'hand' field using sampled values from the Enum
-    hand_strategy = st.sampled_from(Hand)
-
-    # Define a strategy for the 'num' field (assuming it's an integer)
-    num_strategy = st.integers(min_value=1, max_value=WHITE_KEY_NUM - 1)
-
-    # Use st.builds to create instances of WhiteKey using the generated values
-    return st.builds(Key, hand=hand_strategy, num=num_strategy)
-
-
 @st.composite
 def white_key_list_strategy(draw):  # type: ignore
     # Determine the length of the list
