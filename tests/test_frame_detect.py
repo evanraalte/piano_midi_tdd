@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 from hypothesis import given
 
+from piano_midi_tdd.frame import detect_keys
 from piano_midi_tdd.frame import detect_white_keys
 from piano_midi_tdd.frame import find_adjacent_pixels
 from piano_midi_tdd.key import Hand
@@ -21,9 +22,8 @@ def test_can_detect_multiple_key_presses_in_frame(
 ) -> None:
     BG_COLOR = (43, 42, 43)
     frame = generate_piano_keys_in_frame(pressed_keys=keys, bg_color=BG_COLOR)
-    cv2.imshow("", frame)
-    cv2.waitKey(100)
-    pass
+    detected_keys = detect_keys(frame=frame, scan_line_black=13, scan_line_white=37)
+    assert set(detected_keys) == set(keys)
 
 
 @pytest.mark.skip()

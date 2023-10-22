@@ -2,6 +2,7 @@ import math
 
 import numpy as np
 
+from piano_midi_tdd.key import color_table
 from piano_midi_tdd.key import Hand
 from piano_midi_tdd.key import Key
 from piano_midi_tdd.key import WHITE_KEY_NUM
@@ -76,3 +77,16 @@ def detect_white_keys(
     keys = find_white_keys_in_groups(pixel_groups, white_key_width_px=key_width_px)
     white_keys = [Key(num=k, hand=hand) for k in keys]
     return white_keys
+
+
+def detect_keys(
+    frame: np.ndarray[np.uint8], scan_line_white: int, scan_line_black: int
+) -> list[Key]:
+    threshold = 10
+    keys: list[Key] = []
+    for (hand, is_black), color in color_table.items():
+        scan_line = scan_line_black if is_black else scan_line_white
+        pixel_indices = find_pixel_indices(frame[scan_line], color, threshold)
+        pixel_groups = find_adjacent_pixels(pixel_indices, 5)
+        # TODO: find keys in groups
+    return keys

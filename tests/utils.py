@@ -72,7 +72,7 @@ def generate_piano_keys_in_frame(
         if pressed_key.num >= PIANO_KEY_NUM:
             raise ValueError
         x_start, x_end = get_points(pressed_key, frame_width)
-        y_start = 0
+        y_start = frame_height // 2
         y_end = frame_height
         b, g, r = pressed_key.color
         image[y_start:y_end, x_start:x_end, 0] = b
@@ -87,7 +87,7 @@ def generate_piano_keys_in_frame(
             raise ValueError
         x_start, x_end = get_points(pressed_key, frame_width)
         y_start = 0
-        y_end = frame_height
+        y_end = frame_height // 2
         b, g, r = pressed_key.color
         image[y_start:y_end, x_start:x_end, 0] = b
         image[y_start:y_end, x_start:x_end, 1] = g
