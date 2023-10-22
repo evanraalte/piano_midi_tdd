@@ -3,8 +3,8 @@ import math
 import numpy as np
 
 from piano_midi_tdd.key import Hand
+from piano_midi_tdd.key import Key
 from piano_midi_tdd.key import WHITE_KEY_NUM
-from piano_midi_tdd.key import WhiteKey
 
 
 def find_adjacent_pixels(numbers: list[int], threshold: int) -> list[tuple[int, int]]:
@@ -67,12 +67,12 @@ def detect_white_keys(
     frame: np.ndarray[np.uint8],
     hand: Hand,
     scan_line: int = 0,
-) -> list[WhiteKey]:
+) -> list[Key]:
     # Initialize a list to store non-background rows
     key_width_px = len(frame[0]) / WHITE_KEY_NUM
     threshold = 10
     pixel_indices = find_pixel_indices(frame[scan_line], hand.value, threshold)
     pixel_groups = find_adjacent_pixels(pixel_indices, 5)
     keys = find_white_keys_in_groups(pixel_groups, white_key_width_px=key_width_px)
-    white_keys = [WhiteKey(num=k, hand=hand) for k in keys]
+    white_keys = [Key(num=k, hand=hand) for k in keys]
     return white_keys

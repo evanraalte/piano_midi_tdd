@@ -7,8 +7,8 @@ from hypothesis import strategies as st
 from piano_midi_tdd.frame import detect_white_keys
 from piano_midi_tdd.frame import find_adjacent_pixels
 from piano_midi_tdd.key import Hand
+from piano_midi_tdd.key import Key
 from piano_midi_tdd.key import WHITE_KEY_NUM
-from piano_midi_tdd.key import WhiteKey
 
 
 def whitekey_strategy():  # type: ignore
@@ -19,7 +19,7 @@ def whitekey_strategy():  # type: ignore
     num_strategy = st.integers(min_value=1, max_value=WHITE_KEY_NUM - 1)
 
     # Use st.builds to create instances of WhiteKey using the generated values
-    return st.builds(WhiteKey, hand=hand_strategy, num=num_strategy)
+    return st.builds(Key, hand=hand_strategy, num=num_strategy)
 
 
 @st.composite
@@ -37,15 +37,14 @@ def white_key_list_strategy(draw):  # type: ignore
     )
 
     white_key_list = [
-        WhiteKey(draw(st.sampled_from([Hand.LEFT, Hand.RIGHT])), num)
-        for num in unique_nums
+        Key(draw(st.sampled_from([Hand.LEFT, Hand.RIGHT])), num) for num in unique_nums
     ]
 
     return white_key_list
 
 
 def generate_white_keys_in_frame(
-    pressed_keys: list[WhiteKey],
+    pressed_keys: list[Key],
     bg_color: tuple[np.uint8, np.uint8, np.uint8] = (0, 0, 0),
     frame_width: int = 1920,
     frame_height: int = 50,
@@ -76,7 +75,7 @@ def generate_white_keys_in_frame(
 
 @given(white_key_list_strategy())
 def test_can_detect_multiple_white_key_press_in_frame(
-    white_keys: list[WhiteKey],
+    white_keys: list[Key],
 ) -> None:
     BG_COLOR = (43, 42, 43)
     frame = generate_white_keys_in_frame(pressed_keys=white_keys, bg_color=BG_COLOR)
