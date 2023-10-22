@@ -29,7 +29,7 @@ color_table = {
 
 def get_piano_key_width_px(frame_width: int) -> tuple[float, float]:
     white_key_width = frame_width / 52
-    black_key_width = white_key_width * 7 / 12
+    black_key_width = white_key_width * (7 / 12)
     return white_key_width, black_key_width
 
 

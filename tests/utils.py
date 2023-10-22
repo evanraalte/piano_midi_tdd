@@ -39,8 +39,8 @@ def get_points(key: Key, frame_width_px: int) -> tuple[int, int]:
         if next_white_key_idx is None:
             raise ValueError
         x_start = int(next_white_key_idx * white_key_width_px)
-        # and subtract 3.5/12 white key to get x_start for black
-        x_start -= int(white_key_width_px * 3.5 / 12)
+        # and half a black key to get the  start of black
+        x_start -= int(black_key_width_px / 2)
         x_end = x_start + int(black_key_width_px)
     else:
         white_key_idx = get_white_key_idx(key.num)
@@ -65,8 +65,24 @@ def generate_piano_keys_in_frame(
     image[:, :, 1] = g
     image[:, :, 2] = r
 
-    # Add keys
+    # Add white keys
     for pressed_key in pressed_keys:
+        if key_is_black(pressed_key.num):
+            continue
+        if pressed_key.num >= PIANO_KEY_NUM:
+            raise ValueError
+        x_start, x_end = get_points(pressed_key, frame_width)
+        y_start = 0
+        y_end = frame_height
+        b, g, r = pressed_key.color
+        image[y_start:y_end, x_start:x_end, 0] = b
+        image[y_start:y_end, x_start:x_end, 1] = g
+        image[y_start:y_end, x_start:x_end, 2] = r
+
+    # Add black keys
+    for pressed_key in pressed_keys:
+        if not key_is_black(pressed_key.num):
+            continue
         if pressed_key.num >= PIANO_KEY_NUM:
             raise ValueError
         x_start, x_end = get_points(pressed_key, frame_width)

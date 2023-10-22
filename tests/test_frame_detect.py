@@ -7,6 +7,7 @@ from piano_midi_tdd.frame import detect_white_keys
 from piano_midi_tdd.frame import find_adjacent_pixels
 from piano_midi_tdd.key import Hand
 from piano_midi_tdd.key import Key
+from piano_midi_tdd.key import PIANO_KEY_NUM
 from tests.custom_strategies import piano_key_list_strategy
 from tests.custom_strategies import white_key_list_strategy
 from tests.utils import generate_piano_keys_in_frame
@@ -21,7 +22,33 @@ def test_can_detect_multiple_key_presses_in_frame(
     BG_COLOR = (43, 42, 43)
     frame = generate_piano_keys_in_frame(pressed_keys=keys, bg_color=BG_COLOR)
     cv2.imshow("", frame)
-    cv2.wait
+    cv2.waitKey(100)
+    pass
+
+
+@pytest.mark.skip()
+def test_loop_over_keys() -> None:
+    BG_COLOR = (43, 42, 43)
+    for key_num in range(PIANO_KEY_NUM):
+        pressed_key = Key(num=key_num, hand=Hand.LEFT if key_num < 43 else Hand.RIGHT)
+        frame = generate_piano_keys_in_frame(
+            pressed_keys=[pressed_key], bg_color=BG_COLOR
+        )
+        cv2.imshow("", frame)
+        cv2.waitKey(100)
+    pass
+
+
+# @pytest.mark.skip()
+def test_all_keys() -> None:
+    BG_COLOR = (43, 42, 43)
+    pressed_keys = []
+    for key_num in range(PIANO_KEY_NUM):
+        pressed_key = Key(num=key_num, hand=Hand.LEFT if key_num < 43 else Hand.RIGHT)
+        pressed_keys.append(pressed_key)
+    frame = generate_piano_keys_in_frame(pressed_keys=pressed_keys, bg_color=BG_COLOR)
+    cv2.imshow("", frame)
+    cv2.waitKey(0)
     pass
 
 
