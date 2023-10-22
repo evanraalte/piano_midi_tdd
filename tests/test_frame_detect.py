@@ -2,81 +2,59 @@ import cv2
 import numpy as np
 import pytest
 from hypothesis import given
-from hypothesis import strategies as st
 
+from piano_midi_tdd.frame import detect_keys
 from piano_midi_tdd.frame import detect_white_keys
 from piano_midi_tdd.frame import find_adjacent_pixels
 from piano_midi_tdd.key import Hand
-from piano_midi_tdd.key import WHITE_KEY_NUM
-from piano_midi_tdd.key import WhiteKey
+from piano_midi_tdd.key import Key
+from piano_midi_tdd.key import PIANO_KEY_NUM
+from tests.custom_strategies import piano_key_list_strategy
+from tests.custom_strategies import white_key_list_strategy
+from tests.utils import generate_piano_keys_in_frame
+from tests.utils import generate_white_keys_in_frame
 
 
-def whitekey_strategy():  # type: ignore
-    # Define a strategy for the 'hand' field using sampled values from the Enum
-    hand_strategy = st.sampled_from(Hand)
+@pytest.mark.skip()
+@given(piano_key_list_strategy())
+def test_can_detect_multiple_key_presses_in_frame(
+    keys: list[Key],
+) -> None:
+    BG_COLOR = (43, 42, 43)
+    frame = generate_piano_keys_in_frame(pressed_keys=keys, bg_color=BG_COLOR)
+    detected_keys = detect_keys(frame=frame, scan_line_black=13, scan_line_white=37)
+    assert set(detected_keys) == set(keys)
 
-    # Define a strategy for the 'num' field (assuming it's an integer)
-    num_strategy = st.integers(min_value=1, max_value=WHITE_KEY_NUM - 1)
 
-    # Use st.builds to create instances of WhiteKey using the generated values
-    return st.builds(WhiteKey, hand=hand_strategy, num=num_strategy)
-
-
-@st.composite
-def white_key_list_strategy(draw):  # type: ignore
-    # Determine the length of the list
-    list_length = draw(st.integers(min_value=0, max_value=WHITE_KEY_NUM - 1))
-
-    unique_nums = draw(
-        st.lists(
-            st.integers(min_value=1, max_value=WHITE_KEY_NUM - 1),
-            unique=True,
-            min_size=list_length,
-            max_size=list_length,
+@pytest.mark.skip()
+def test_loop_over_keys() -> None:
+    BG_COLOR = (43, 42, 43)
+    for key_num in range(PIANO_KEY_NUM):
+        pressed_key = Key(num=key_num, hand=Hand.LEFT if key_num < 43 else Hand.RIGHT)
+        frame = generate_piano_keys_in_frame(
+            pressed_keys=[pressed_key], bg_color=BG_COLOR
         )
-    )
-
-    white_key_list = [
-        WhiteKey(draw(st.sampled_from([Hand.LEFT, Hand.RIGHT])), num)
-        for num in unique_nums
-    ]
-
-    return white_key_list
+        cv2.imshow("", frame)
+        cv2.waitKey(100)
+    pass
 
 
-def generate_white_keys_in_frame(
-    pressed_keys: list[WhiteKey],
-    bg_color: tuple[np.uint8, np.uint8, np.uint8] = (0, 0, 0),
-    frame_width: int = 1920,
-    frame_height: int = 50,
-) -> np.ndarray[np.uint8]:
-    white_key_width = frame_width / WHITE_KEY_NUM
-    image = np.zeros((frame_height, frame_width, 3), np.uint8)
-
-    # Add background color
-    b, g, r = bg_color
-    image[:, :, 0] = b
-    image[:, :, 1] = g
-    image[:, :, 2] = r
-
-    # Add keys
-    for pressed_key in pressed_keys:
-        if pressed_key.num > WHITE_KEY_NUM:
-            raise ValueError
-        x_start = int(pressed_key.num * white_key_width)
-        x_end = x_start + int(white_key_width)
-        y_start = 0
-        y_end = frame_height
-        b, g, r = pressed_key.hand.value
-        image[y_start:y_end, x_start:x_end, 0] = b
-        image[y_start:y_end, x_start:x_end, 1] = g
-        image[y_start:y_end, x_start:x_end, 2] = r
-    return image
+@pytest.mark.skip()
+def test_all_keys() -> None:
+    BG_COLOR = (43, 42, 43)
+    pressed_keys = []
+    for key_num in range(PIANO_KEY_NUM):
+        pressed_key = Key(num=key_num, hand=Hand.LEFT if key_num < 43 else Hand.RIGHT)
+        pressed_keys.append(pressed_key)
+    frame = generate_piano_keys_in_frame(pressed_keys=pressed_keys, bg_color=BG_COLOR)
+    cv2.imshow("", frame)
+    cv2.waitKey(0)
+    pass
 
 
 @given(white_key_list_strategy())
 def test_can_detect_multiple_white_key_press_in_frame(
-    white_keys: list[WhiteKey],
+    white_keys: list[Key],
 ) -> None:
     BG_COLOR = (43, 42, 43)
     frame = generate_white_keys_in_frame(pressed_keys=white_keys, bg_color=BG_COLOR)
