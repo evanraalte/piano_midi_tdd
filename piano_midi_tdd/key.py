@@ -5,6 +5,7 @@ from typing import Any
 import numpy as np
 
 WHITE_KEY_NUM = 52
+PIANO_KEY_NUM = 88
 
 
 class Hand(Enum):
@@ -24,6 +25,12 @@ color_table = {
     (Hand.RIGHT, False): (84, 224, 150),
     (Hand.RIGHT, True): (19, 144, 78),
 }
+
+
+def get_piano_key_width_px(frame_width: int) -> tuple[float, float]:
+    white_key_width = frame_width / 52
+    black_key_width = white_key_width * 7 / 12
+    return white_key_width, black_key_width
 
 
 @dataclass
